@@ -1,6 +1,5 @@
 CC = gcc
 CFLAGS = -lgmp
-CFLAGS_DEBUG = -lgmp -ggdb -DPAILLIER_DEBUG
 DEPS = src/paillier.h src/tools.h
 OBJ_DEBUG = debug/tools.o debug/paillier.o debug/paillier_manage_keys.o debug/paillier_io.o debug/main.o 
 OBJ_LIB = release/tools.o release/paillier.o release/paillier_manage_keys.o release/paillier_io.o
@@ -8,10 +7,10 @@ OBJ_RELEASE = $(OBJ_LIB) release/main.o
 
 #debug recipes
 debug/%.o: src/%.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS_DEBUG)
+	$(CC) -c -o $@ $< $(CFLAGS) -ggdb -DPAILLIER_DEBUG
 
-debug/paillier: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS_DEBUG)
+debug/paillier: $(OBJ_DEBUG)
+	$(CC) -o $@ $^ $(CFLAGS) -ggdb -DPAILLIER_DEBUG
 
 #release recipes
 release/%.o: src/%.c $(DEPS)

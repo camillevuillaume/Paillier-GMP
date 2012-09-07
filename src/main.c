@@ -4,6 +4,7 @@
  * @date Created on: Aug 25, 2012
  * @author Camille Vuillaume
  * @copyright Camille Vuillaume, 2012
+ * @defgroup Interpreter Command interpreter for Paillier cryptosystem
  *
  * This file is part of Paillier-GMP.
  *
@@ -23,11 +24,47 @@
  *
  */
 
+/** @mainpage
+ *
+ * Paillier-GMP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Paillier-GMP.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * @section req Requirements
+ *
+ * You need a system with /dev/urandom and gmp to run this program.
+ *
+ * @section syntx Syntax for the built-in interpreter
+ *
+ * Available commands:
+ * - paillier keygen [public key file name] [private key file name] [bit length]
+ * - paillier encrypt [output ciphertext file name] [input plain text file name] [public key file name]
+ * - paillier decrypt [output plaintext file name] [input ciphertext file name] [private key file name]
+ *
+ * @section build Building the program
+ *
+ * Make options:
+ * - "make all" will build the documentation, the interpreter and the static library.
+ * - "make release" will build the interpreter.
+ * - "make doc" will build the documentation.
+ * - "make debug" will build the interpreter with debug symbols.
+ *
+ * @section warning Warning
+ *
+ * There is no formatting check. If message/key formatting is incorrect, in the best case the program will crash.
+ * Also be warned that the private key is stored unencrypted. Use the program at your own risk!
+ *
+ */
 #include <stdio.h>
 #include "paillier.h"
 
 /** Help message
  *
+ * @ingroup Interpreter
  */
 const char *hlp_message =
 		"Syntax: paillier [options]\n"
@@ -38,13 +75,14 @@ const char *hlp_message =
 
 /** Main function
  *
+ * @ingroup Interpreter
  * Run key generation, encryption or decryption.
  *
  * @param[in] argc number of arguments
- * @param[in] argv
- * keygen [public_key_file] [private_key_file] [bit length]
- * encrypt [out_file] [in_file] [public_key_file]
- * decrypt [out_file] [in_file] [private_key_file]
+ * @param[in] argv arguments
+ * - keygen [public_key_file] [private_key_file] [bit length]
+ * - encrypt [out_file] [in_file] [public_key_file]
+ * - decrypt [out_file] [in_file] [private_key_file]
  */
 int main(int argc, char *argv[]) {
 	FILE *fp1, *fp2, *fp3;

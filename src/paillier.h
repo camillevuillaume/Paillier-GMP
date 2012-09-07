@@ -4,7 +4,7 @@
  * @date 		Created on: Aug 25, 2012
  * @author 		Camille Vuillaume
  * @copyright 	Camille Vuillaume, 2012
- * @defgroup 	Paillier Paillier
+ * @defgroup 	Paillier Paillier cryptosystem
  *
  * This file is part of Paillier-GMP.
  *
