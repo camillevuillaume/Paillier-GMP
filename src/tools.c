@@ -26,13 +26,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <gmp.h>
+#include "tools.h"
 
-int gen_random(mpz_t rnd, mp_bitcnt_t bits) {
+/**
+ * The function prints debug messages to stderr; it is compiled out if PAILLIER_DEBUG is not defined.
+ */
+inline int debug_msg(const char *str) {
+#ifdef PAILLIER_DEBUG
+	return fputs(str, stderr);
+#endif
+}
+
+/**
+ * Generate a random number using /dev/urandom
+ */
+int gen_random(mpz_t rnd, mp_bitcnt_t len) {
 	FILE *dev_urandom;
 	int byte_count, byte_read;
 	char * seed;
 
-	byte_count = (bits+7) >> 3;
+	byte_count = BIT2BYTE(len);
 
 	dev_urandom = fopen("/dev/urandom", "r");
 	if(dev_urandom == NULL) {
@@ -54,14 +67,18 @@ int gen_random(mpz_t rnd, mp_bitcnt_t bits) {
 	return 0;
 }
 
-int gen_prime(mpz_t prime, mp_bitcnt_t bits) {
+/**
+ * Generate a random prime number using /dev/random as a source of randomness.
+ * Since /dev/random is blocking, you may need to move your mouse to feed randomness.
+ */
+int gen_prime(mpz_t prime, mp_bitcnt_t len) {
 	FILE * dev_random, *dev_urandom;
 	int byte_count, byte_read;
 	char * seed;
 	mpz_t rnd;
 
-	mpz_init2(rnd, bits);
-	byte_count = (bits+7) >> 3;
+	mpz_init2(rnd, len);
+	byte_count = BIT2BYTE(len);
 
 	dev_random = fopen("/dev/random", "r");
 	if(dev_random == NULL) {
@@ -80,7 +97,7 @@ int gen_prime(mpz_t prime, mp_bitcnt_t bits) {
 
 	mpz_import(rnd, byte_count, 1, sizeof(seed[0]), 0, 0, seed);
 	//set most significant bit to 1
-	mpz_setbit(rnd, bits-1);
+	mpz_setbit(rnd, len-1);
 	//look for next prime
 	mpz_nextprime(prime, rnd);
 
@@ -89,6 +106,12 @@ int gen_prime(mpz_t prime, mp_bitcnt_t bits) {
 	return 0;
 }
 
+/**
+ * The exponentiation is computed using Garner's method for the CRT:
+ * - Exponentiation mod p: y_p = (x mod p)^{exp_p} mod p
+ * - Exponentiation mod q: y_q = (x mod q)^{exp_q} mod q
+ * - Recombination: y = y_p + p*(p^{-1} mod q)*(y_q-y_p) mod n
+ */
 int crt_exponentiation(mpz_t result, mpz_t base, mpz_t exp_p, mpz_t exp_q, mpz_t pinvq, mpz_t p, mpz_t q) {
 	mpz_t res_p, res_q, base_p, base_q, pq;
 	mpz_init(res_p);

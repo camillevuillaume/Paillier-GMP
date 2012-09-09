@@ -25,7 +25,11 @@
 
 #include "paillier.h"
 
-int paillier_keygen_str(FILE *public_key, FILE *private_key, int bits) {
+/**
+ * Wrapper to the key generation function using stdio streams as inputs and output.
+ * @see paillier_keygen
+ */
+int paillier_keygen_str(FILE *public_key, FILE *private_key, int len) {
 	int result;
 	paillier_public_key pub;
 	paillier_private_key priv;
@@ -34,7 +38,7 @@ int paillier_keygen_str(FILE *public_key, FILE *private_key, int bits) {
 	paillier_private_init(&priv);
 
 	//generate keys
-	result = paillier_keygen(&pub, &priv, bits);
+	result = paillier_keygen(&pub, &priv, len);
 
 	//export public key
 	debug_msg("export public key: \n");
@@ -52,6 +56,10 @@ int paillier_keygen_str(FILE *public_key, FILE *private_key, int bits) {
 	return result;
 }
 
+/**
+ * Wrapper to the encryption function using stdio streams as inputs and output.
+ * @see paillier_encrypt
+ */
 int paillier_encrypt_str(FILE *ciphertext, FILE *plaintext, FILE *public_key) {
 	mpz_t c, m;
 	int result;
@@ -88,6 +96,10 @@ int paillier_encrypt_str(FILE *ciphertext, FILE *plaintext, FILE *public_key) {
 	return result;
 }
 
+/**
+ * Wrapper to the decryption function using stdio streams as inputs and output.
+ * @see paillier_decrypt
+ */
 int paillier_decrypt_str(FILE *plaintext, FILE *ciphertext, FILE *private_key) {
 	mpz_t c, m, n2;
 	paillier_private_key priv;

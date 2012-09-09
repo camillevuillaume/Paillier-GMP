@@ -33,16 +33,22 @@
  * @param[out] result output result (u-1)/n
  * @param[in] input u
  * @param[in] ninv input n^{-1} mod 2^len
- * @param[in] bits input bit length len
+ * @param[in] len input bit length
+ * @return 0 if no error
+ *
+ * The function L is evaluated using the pre-computed value n^{-1} mod 2^len.
+ * The calculation a/n is computed as a*n^{-1} mod 2^len
+ * - First a non-modular multiplication with n^{-1} mod 2^len is calculated.
+ * - Then the result is reduced by masking higher bits.
  */
-int paillier_ell(mpz_t result, mpz_t input, mpz_t ninv, mp_bitcnt_t bits) {
+int paillier_ell(mpz_t result, mpz_t input, mpz_t ninv, mp_bitcnt_t len) {
 	mpz_t mask;
 
 	mpz_init(mask);
 
 	mpz_sub_ui(result, input, 1);
 	mpz_mul(result, result, ninv);
-	mpz_setbit(mask, bits);
+	mpz_setbit(mask, len);
 	mpz_sub_ui(mask, mask, 1);
 	mpz_and(result, result, mask);
 
@@ -50,7 +56,19 @@ int paillier_ell(mpz_t result, mpz_t input, mpz_t ninv, mp_bitcnt_t bits) {
 	return 0;
 }
 
-int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bitcnt_t bits) {
+/**
+ * The function does the following.
+ * - It generates two (probable) primes p and q having bits/2 bits.
+ * - It computes the modulus n=p*q and sets the basis g to 1+n.
+ * - It pre-computes n^{-1} mod 2^len.
+ * - It pre-computes the CRT paramter p^{-2} mod q^2.
+ * - It calculates lambda = lcm((p-1)*(q-1))
+ * - It calculates mu = L(g^lambda mod n^2)^{-1} mod n using the CRT.
+ * .
+ * Since the prime numbers are generated with /dev/random as source of randomness, the program may block.
+ * In that case, you have to wait or move your mouse to feed /dev/random with fresh randomness.
+ */
+int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bitcnt_t len) {
 	mpz_t p, q, n2, temp, mask, g;
 
 	mpz_init(p);
@@ -61,14 +79,14 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	mpz_init(g);
 
 	//write bit lengths
-	priv->bitlen = bits;
-	pub->bitlen = bits;
+	priv->len = len;
+	pub->len = len;
 
 	//generate p and q
 	debug_msg("generating prime p\n");
-	gen_prime(p, bits/2);
+	gen_prime(p, len/2);
 	debug_msg("generating prime q\n");
-	gen_prime(q, bits/2);
+	gen_prime(q, len/2);
 
 	//calculate modulus n=p*q
 	debug_msg("calculating modulus n=p*q\n");
@@ -81,7 +99,7 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 
 	//compute n^{-1} mod 2^{len}
 	debug_msg("computing modular inverse n^{-1} mod 2^{len}\n");
-	mpz_setbit(temp, bits);
+	mpz_setbit(temp, len);
 	if(!mpz_invert(priv->ninv, pub->n, temp)) {
 		fputs("Inverse does not exist!\n", stderr);
 		mpz_clear(p);
@@ -114,7 +132,7 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	debug_msg("calculating mu\n");
 	crt_exponentiation(temp, g, priv->lambda, priv->lambda, priv->p2invq2, priv->p2, priv->q2);
 
-	paillier_ell(temp, temp, priv->ninv, bits);
+	paillier_ell(temp, temp, priv->ninv, len);
 
 	if(!mpz_invert(priv->mu, temp, pub->n)) {
 		fputs("Inverse does not exist!\n", stderr);
@@ -139,6 +157,10 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	return 0;
 }
 
+/**
+ * The function calculates c=g^m*r^n mod n^2 with r random number.
+ * Encryption benefits from the fact that g=1+n, because (1+n)^m = 1+n*m mod n^2.
+ */
 int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub) {
 	mpz_t n2, r;
 
@@ -151,7 +173,7 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 
 		debug_msg("generating random number\n");
 		//generate random r and reduce modulo n
-		gen_random(r, pub->bitlen);
+		gen_random(r, pub->len);
 		mpz_mod(r, r, pub->n);
 		if(mpz_cmp_ui(r, 0) == 0) {
 			fputs("random number is zero!\n", stderr);
@@ -180,13 +202,17 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 	return 0;
 }
 
+/**
+ * The decryption function computes m = L(c^lambda mod n^2)*mu mod n.
+ * The exponentiation is calculated using the CRT.
+ */
 int paillier_decrypt(mpz_t plaintext, mpz_t ciphertext, paillier_private_key *priv) {
 	debug_msg("computing plaintext\n");
 	//compute exponentiation c^lambda mod n^2
 	crt_exponentiation(plaintext, ciphertext, priv->lambda, priv->lambda, priv->p2invq2, priv->p2, priv->q2);
 
 	//compute L(c^lambda mod n^2)
-	paillier_ell(plaintext, plaintext, priv->ninv, priv->bitlen);
+	paillier_ell(plaintext, plaintext, priv->ninv, priv->len);
 
 	//compute L(c^lambda mod n^2)*mu mod n
 	mpz_mul(plaintext, plaintext, priv->mu);

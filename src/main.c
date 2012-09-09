@@ -34,9 +34,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Paillier-GMP.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * @section des General Description
+ *
+ * This program implements the Paillier cryptosystem with GMP for low-level functions (modular exponentiations, multiplications...).
+ * It uses the following implementation tricks:
+ * - Whenever possible (i.e. key generation and decryption) exponentiations are computed using the Chinese Remainder Theorem (CRT).
+ * - The basis g is selected as 1+n, which allows faster encryption.
+ * - The value n^{-1} mod 2^len is pre-calculated and stored in the private key, which allows fast calculations of divisions by n.
+ *
+ * The program includes:
+ * - Memory allocation/free routines.
+ * - Import and export of the public/private keys to files.
+ * - A small command interpreter for generating keys, encrypting and decrypting text files (or stdin).
+ *
+ * From the project, you can:
+ * - Compile a static library.
+ * - Compile the interpreter.
+ * - Compile the interpreter with debug symbols and debug messages.
+ * - Compile the documentation with doxygen.
+ *
  * @section req Requirements
  *
- * You need a system with /dev/urandom and gmp to run this program.
+ * You need a system with /dev/urandom and GMP to run this program.
  *
  * @section syntx Syntax for the built-in interpreter
  *

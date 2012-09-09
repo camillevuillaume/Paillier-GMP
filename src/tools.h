@@ -34,38 +34,34 @@
  *
  * @ingroup Tools
  */
-#define BIT2BYTE(a) (a+7)/8
+#define BIT2BYTE(a) (a+7)>>3
 
 /** Print debug message
  *
  * @ingroup Tools
  * @param[in] str input debug message
  */
-inline int debug_msg(const char *str) {
-#ifdef PAILLIER_DEBUG
-	return fputs(str, stderr);
-#endif
-}
+inline int debug_msg(const char *str);
 
 /** Generate random number
  *
  * @ingroup Tools
  * @param[out] rnd output random number, randomness coming from /dev/urandom
- * @param[in] bits input bit length of the random number to generate
+ * @param[in] len input bit length of the random number to generate
  */
 int gen_random(
 		mpz_t rnd,
-		mp_bitcnt_t bits);
+		mp_bitcnt_t len);
 
 /** Generate prime number
  *
  * @ingroup Tools
  * @param[out] prime output prime number, randomness coming from /dev/random
- * @param[in] bits input bit length of prime number to generate
+ * @param[in] len input bit length of prime number to generate
  */
 int gen_prime(
 		mpz_t prime,
-		mp_bitcnt_t bits);
+		mp_bitcnt_t len);
 
 /** Exponentiation with Chinese Remainder Theorem
  *

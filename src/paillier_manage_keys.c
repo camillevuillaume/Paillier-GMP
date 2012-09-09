@@ -56,7 +56,7 @@ void paillier_private_clear(paillier_private_key *priv) {
 int paillier_public_out_str(FILE *fp, paillier_public_key *pub) {
 	int printf_ret, result = 0;
 
-	printf_ret = gmp_fprintf(fp, "%d\n", pub->bitlen);
+	printf_ret = gmp_fprintf(fp, "%d\n", pub->len);
 	if(printf_ret < 0) return printf_ret;
 	result += printf_ret;
 	debug_msg("output modulus n\n");
@@ -70,7 +70,7 @@ int paillier_public_out_str(FILE *fp, paillier_public_key *pub) {
 int paillier_private_out_str(FILE *fp, paillier_private_key *priv) {
 	int printf_ret, result = 0;
 
-	printf_ret = gmp_fprintf(fp, "%d\n", priv->bitlen);
+	printf_ret = gmp_fprintf(fp, "%d\n", priv->len);
 	if(printf_ret < 0) return printf_ret;
 	result += printf_ret;
 	printf_ret = gmp_fprintf(fp, "%Zx\n", priv->lambda);
@@ -102,7 +102,7 @@ int paillier_public_in_str(paillier_public_key *pub, FILE *fp) {
 	int scanf_ret, result = 0;
 
 	debug_msg("importing bit length\n");
-	scanf_ret = gmp_fscanf(fp, "%d\n", &(pub->bitlen));
+	scanf_ret = gmp_fscanf(fp, "%d\n", &(pub->len));
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
 	debug_msg("importing modulus\n");
@@ -117,7 +117,7 @@ int paillier_private_in_str(paillier_private_key *priv, FILE *fp) {
 	int scanf_ret, result = 0;
 
 	debug_msg("importing bit length\n");
-	scanf_ret = gmp_fscanf(fp, "%d\n", &(priv->bitlen));
+	scanf_ret = gmp_fscanf(fp, "%d\n", &(priv->len));
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
 	debug_msg("importing lambda\n");
