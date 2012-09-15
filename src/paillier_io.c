@@ -191,3 +191,53 @@ int paillier_homomorphic_add_str(FILE *ciphertext3, FILE *ciphertext1, FILE *cip
 	return result;
 }
 
+/**
+ * Wrapper to the homomorphic multiplication function using stdio streams as inputs and output.
+ * @see paillier_homomorphic_add
+ */
+int paillier_homomorphic_multc_str(FILE *ciphertext2, FILE *ciphertext1, FILE *constant, FILE *public_key) {
+	mpz_t c2, c1, k, n2;
+	paillier_public_key pub;
+	int result;
+
+	mpz_init(c2);
+	mpz_init(c1);
+	mpz_init(k);
+	mpz_init(n2);
+	paillier_public_init(&pub);
+
+	//import public key
+	debug_msg("importing public key: \n");
+	paillier_public_in_str(&pub, public_key);
+
+	//compute n^2
+	mpz_mul(n2, pub.n, pub.n);
+
+	//convert ciphertext from stream
+	debug_msg("importing ciphertexts: \n");
+	gmp_fscanf(ciphertext1, "%Zx\n", c1);
+	if(mpz_cmp(c1, n2) >= 0) {
+		fputs("Warning, first ciphertext is larger than modulus n^2!\n", stderr);
+	}
+	gmp_fscanf(constant, "%Zx\n", k);
+	if(mpz_cmp(k, pub.n) >= 0) {
+		fputs("Warning, constant is larger than modulus n!\n", stderr);
+	}
+	//calculate decryption
+	result = paillier_homomorphic_multc(c2, c1, k, &pub);
+
+	//convert result to stream
+	debug_msg("exporting result: \n");
+	gmp_fprintf(ciphertext2, "%Zx\n", c2);
+
+	debug_msg("freeing memory\n");
+	mpz_clear(c2);
+	mpz_clear(c1);
+	mpz_clear(k);
+	mpz_clear(n2);
+	paillier_public_clear(&pub);
+
+	debug_msg("exiting\n");
+	return result;
+}
+

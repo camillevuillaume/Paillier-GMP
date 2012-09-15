@@ -21,7 +21,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Paillier-GMP.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 #ifndef PAILLIER_H_
@@ -202,28 +201,27 @@ int paillier_decrypt_str(
 		FILE *plaintext,
 		FILE *private_key);
 
-/** Homomorphically add two plaintexts by multiplying corresponding ciphertexts
+/** Homomorphically add two plaintexts
  *
  * @ingroup Paillier
- * @param[out] result output ciphertext corresponding to the homomorphic addition of the two plaintexts
+ * @param[out] ciphertext3 output ciphertext corresponding to the homomorphic addition of the two plaintexts
  * @param[in] ciphertext1 input first ciphertext corresponding to a plaintext to be homomorphically added
  * @param[in] ciphertext2 input second ciphertext corresponding to a plaintext to be homomorphically added
- * @param[in] pub input private key
+ * @param[in] pub input public key
  * @return 0 if no error
- *
  */
 int paillier_homomorphic_add(
-		mpz_t result,
+		mpz_t ciphertext3,
 		mpz_t ciphertext1,
 		mpz_t ciphertext2,
 		paillier_public_key *pub);
 
-/** Homomorphically add from stdio stream
+/** Homomorphically add two plaintexts from stdio stream
  *
  * @ingroup Paillier
  * @param[out] ciphertext3 output stream for result of homomorphic addition
  * @param[in] ciphertext1 input stream for first ciphertext c1
- * @param[in] ciphertext2 input stream for first ciphertext c2
+ * @param[in] ciphertext2 input stream for second ciphertext c2
  * @param[in] public_key input stream for public key
  * @return 0 if no error
  */
@@ -231,6 +229,37 @@ int paillier_homomorphic_add_str(
 		FILE *ciphertext3,
 		FILE *ciphertext1,
 		FILE *ciphertext2,
+		FILE *public_key);
+
+/** Homomorphically multiply a plaintext with a constant
+ *
+ * @ingroup Paillier
+ * @param[out] ciphertext2 output ciphertext corresponding to the homomorphic multiplication of the plaintext with the constant
+ * @param[in] ciphertext1 input ciphertext corresponding to a plaintext to be homomorphically multiplied
+ * @param[in] constant input constant to be homomorphically multiplied
+ * @param[in] pub input public key
+ * @return 0 if no error
+ */
+int paillier_homomorphic_multc(
+		mpz_t ciphertext2,
+		mpz_t ciphertext1,
+		mpz_t constant,
+		paillier_public_key *pub);
+
+
+/** Homomorphically multiply a plaintext with a constant from stdio stream
+ *
+ * @ingroup Paillier
+ * @param[out] ciphertext2 output stream for result of homomorphic multiplication
+ * @param[in] ciphertext1 input stream for ciphertext c
+ * @param[in] constant input stream for constant k
+ * @param[in] public_key input stream for public key
+ * @return 0 if no error
+ */
+int paillier_homomorphic_multc_str(
+		FILE *ciphertext2,
+		FILE *ciphertext1,
+		FILE *plaintext,
 		FILE *public_key);
 
 #endif /* PAILLIER_H_ */

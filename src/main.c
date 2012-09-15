@@ -66,6 +66,7 @@
  * - paillier encrypt [output ciphertext file name] [input plain text file name] [public key file name]
  * - paillier decrypt [output plaintext file name] [input ciphertext file name] [private key file name]
  * - paillier homoadd [output ciphertext 3 file name] [input ciphertext 1 file name] [input ciphertext 2 file name] [public key file name]
+ * - paillier homomul [output ciphertext 2 file name] [input ciphertext 1 file name] [input constant file name] [public key file name]
  *.
  * For example
  * - ./paillier keygen pub2048 priv2048 2048
@@ -110,7 +111,8 @@ const char *hlp_message =
 		"  keygen [public_key_file] [private_key_file] [bit length]\n"
 		"  encrypt [out_file] [in_file] [public_key_file]\n"
 		"  decrypt [out_file] [in_file] [private_key_file]\n"
-		"  homoadd [out_file] [in_file1] [in_file2] [private_key_file]\n";
+		"  homoadd [out_file] [in_file1] [in_file2] [public_key_file]\n"
+		"  homomul [out_file] [in_file] [in_constant] [public_key_file]\n";
 
 /** Main function
  *
@@ -122,7 +124,8 @@ const char *hlp_message =
  * - keygen [public_key_file] [private_key_file] [bit length]
  * - encrypt [out_file] [in_file] [public_key_file]
  * - decrypt [out_file] [in_file] [private_key_file]
- * - homo [out_file] [in_file1] [in_file2] [public_key_file]
+ * - homoadd [out_file] [in_file1] [in_file2] [public_key_file]
+ * - homomul [out_file] [in_file] [in_constant] [public_key_file]
  */
 int main(int argc, char *argv[]) {
 	FILE *fp1, *fp2, *fp3, *fp4;
@@ -224,6 +227,31 @@ int main(int argc, char *argv[]) {
 			exit(1);
 		}
 		paillier_homomorphic_add_str(fp1, fp2, fp3, fp4);
+		fclose(fp1);
+		fclose(fp2);
+		fclose(fp3);
+		fclose(fp4);
+	}
+	//homomorphic add
+	else if(argc == 6 && strcmp(argv[1], "homomul")==0) {
+		//open files
+		if(!(fp1 = fopen(argv[2], "w"))) {
+			fputs("not possible to write to output ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp2 = fopen(argv[3], "r"))) {
+			fputs("not possible to read from input ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp3 = fopen(argv[4], "r"))) {
+			fputs("not possible to read from input constant file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp4 = fopen(argv[5], "r"))) {
+			fputs("not possible to read from public key file!\n", stderr);
+			exit(1);
+		}
+		paillier_homomorphic_multc_str(fp1, fp2, fp3, fp4);
 		fclose(fp1);
 		fclose(fp2);
 		fclose(fp3);
