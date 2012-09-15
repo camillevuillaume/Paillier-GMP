@@ -65,6 +65,19 @@
  * - paillier keygen [public key file name] [private key file name] [bit length]
  * - paillier encrypt [output ciphertext file name] [input plain text file name] [public key file name]
  * - paillier decrypt [output plaintext file name] [input ciphertext file name] [private key file name]
+ * - paillier homoadd [output ciphertext 3 file name] [input ciphertext 1 file name] [input ciphertext 2 file name] [public key file name]
+ *.
+ * For example
+ * - ./paillier keygen pub2048 priv2048 2048
+ * - echo 5 > m1
+ * - echo 6 > m2
+ * - ./paillier encrypt c1 m1 pub2048
+ * - ./paillier encrypt c2 m2 pub2048
+ * - ./paillier homoadd c3 c1 c2 pub2048
+ * - ./paillier decrypt m3 c3 priv2048
+ * - cat c3
+ * .
+ * Should yield 0xb=11=5+6.
  *
  * @section build Building the program
  *
