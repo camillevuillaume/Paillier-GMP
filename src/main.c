@@ -39,15 +39,17 @@
  * This program implements the Paillier cryptosystem with GMP for low-level functions (modular exponentiations, multiplications...).
  * It uses the following implementation tricks:
  * - Whenever possible (i.e. key generation and decryption) exponentiations are computed using the Chinese Remainder Theorem (CRT).
+ * - When the program is compiled with the thread option, CRT exponentiation uses two threads, one per exponentiation.
  * - The basis g is selected as 1+n, which allows faster encryption.
  * - The value n^{-1} mod 2^len is pre-calculated and stored in the private key, which allows fast calculations of divisions by n.
  *
  * The program includes:
- * - Memory allocation/free routines.
+ * - Memory allocation/free routines for public/private keys.
  * - Import and export of the public/private keys to files.
+ * - Key generation, encryption and decryption.
  * - A small command interpreter for generating keys, encrypting and decrypting text files (or stdin).
  *
- * From the project, you can:
+ * Using the provided makefile, you can:
  * - Compile a static library.
  * - Compile the interpreter.
  * - Compile the interpreter with debug symbols and debug messages.
