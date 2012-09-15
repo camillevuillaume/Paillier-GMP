@@ -69,44 +69,37 @@ int gen_random(mpz_t rnd, mp_bitcnt_t len) {
 }
 
 /**
- * Generate a random prime number using /dev/random as a source of randomness.
- * Since /dev/random is blocking, you may need to move your mouse to feed randomness.
+ * Generate a random prime number using /dev/urandom as a source of randomness.
  */
 int gen_prime(mpz_t prime, mp_bitcnt_t len) {
-	FILE * dev_random;
-	int byte_count, byte_read;
-	char * seed;
 	mpz_t rnd;
 
-	mpz_init2(rnd, len);
-	byte_count = BIT2BYTE(len);
+	mpz_init(rnd);
 
-	dev_random = fopen("/dev/random", "r");
-	if(dev_random == NULL) {
-		fprintf(stderr, "cannot open random number device!\n");
-		exit(1);
-	}
+	gen_random(rnd, len);
 
-	seed = (char *)malloc(sizeof(char)*byte_count);
-
-	byte_read = 0;
-	//generate the bytes with dev/random
-	while(byte_read < byte_count) {
-		byte_read += fread(seed, sizeof(char), byte_count, dev_random);
-	}
-	fclose(dev_random);
-
-	mpz_import(rnd, byte_count, 1, sizeof(seed[0]), 0, 0, seed);
 	//set most significant bit to 1
 	mpz_setbit(rnd, len-1);
 	//look for next prime
 	mpz_nextprime(prime, rnd);
 
 	mpz_clear(rnd);
-	free(seed);
 	return 0;
 }
 
+/** Threaded exponentiation
+ * @ingroup Tools
+ *
+ * This function reduces the input modulo the given modulus, and performs a modular exponentiation.
+ * It is intended to be run in a pthread.
+ *
+ * @param[in,out] args arguments for the exponentiation, a pointer to an exp_args, with
+ * - exp_args::result storing the result of the exponentiation
+ * - exp_args::basis storing the basis
+ * - exp_args::exponent storing the exponent
+ * - exp_args::modulus storing the modulus
+ *
+ */
 void *do_exponentiate(void *args) {
 	mpz_t basis_reduced;
 	exp_args * args_struct = (exp_args *)args;
@@ -125,6 +118,8 @@ void *do_exponentiate(void *args) {
  * - Exponentiation mod p: y_p = (x mod p)^{exp_p} mod p
  * - Exponentiation mod q: y_q = (x mod q)^{exp_q} mod q
  * - Recombination: y = y_p + p*(p^{-1} mod q)*(y_q-y_p) mod n
+ * .
+ * The exponentiations mod p and mod q run in their own thread.
  */
 int crt_exponentiation(mpz_t result, mpz_t base, mpz_t exp_p, mpz_t exp_q, mpz_t pinvq, mpz_t p, mpz_t q) {
 	mpz_t pq;

@@ -204,7 +204,8 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 
 /**
  * The decryption function computes m = L(c^lambda mod n^2)*mu mod n.
- * The exponentiation is calculated using the CRT.
+ * The exponentiation is calculated using the CRT, and exponentiations mod p^2 and q^2 run in their own thread.
+ *
  */
 int paillier_decrypt(mpz_t plaintext, mpz_t ciphertext, paillier_private_key *priv) {
 	debug_msg("computing plaintext\n");
