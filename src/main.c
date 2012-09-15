@@ -57,7 +57,7 @@
  *
  * You need a system with /dev/urandom and GMP to run this program.
  *
- * @section syntx Syntax for the built-in interpreter
+ * @section syntax Syntax for the built-in interpreter
  *
  * Available commands:
  * - paillier keygen [public key file name] [private key file name] [bit length]
@@ -74,12 +74,15 @@
  *
  * @section warning Warning
  *
- * There is no formatting check. If message/key formatting is incorrect, in the best case the program will crash.
- * Also be warned that the private key is stored unencrypted. Use the program at your own risk!
+ * There is little formatting check. If message/key formatting is incorrect, in the best case the program will crash.
+ * The private key is stored unencrypted. Use the program at your own risk!
  *
  */
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
+#include <errno.h>
 #include "paillier.h"
 
 /** Help message
@@ -106,29 +109,78 @@ const char *hlp_message =
  */
 int main(int argc, char *argv[]) {
 	FILE *fp1, *fp2, *fp3;
-	int bitlen;
+	long bitlen;
+	char *end_ptr;
 
+	//key generation
 	if(argc == 5 && strcmp(argv[1], "keygen")==0) {
-		fp1 = fopen(argv[2], "w");
-		fp2 = fopen(argv[3], "w");
-		sscanf(argv[4], "%d", &bitlen);
+		//open files
+		if(!(fp1 = fopen(argv[2], "w"))) {
+			fputs("not possible to write to public key file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp2 = fopen(argv[3], "w"))) {
+			fputs("not possible to write to private key file!\n", stderr);
+			exit(1);
+		}
+
+		//get bit length
+		errno = 0;
+		bitlen = strtol(argv[4], &end_ptr, 10);
+	    if ((errno == ERANGE && (bitlen == LONG_MAX || bitlen == LONG_MIN)) || (errno != 0 && bitlen == 0)) {
+			fputs("error while parsing bit length!\n", stderr);
+			exit(1);
+	    }
+	    if(argv[4] == end_ptr) {
+			fputs("incorrect formatting for bit length!\n", stderr);
+			exit(1);
+	    }
+	    if(bitlen >= INT_MAX) {
+			fputs("bit length too large!\n", stderr);
+			exit(1);
+	    }
+
 		paillier_keygen_str(fp1, fp2, bitlen);
 		fclose(fp1);
 		fclose(fp2);
 	}
+
+	//encryption
 	else if(argc == 5 && strcmp(argv[1], "encrypt")==0) {
-		fp1 = fopen(argv[2], "w");
-		fp2 = fopen(argv[3], "r");
-		fp3 = fopen(argv[4], "r");
+		//open files
+		if(!(fp1 = fopen(argv[2], "w"))) {
+			fputs("not possible to write to ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp2 = fopen(argv[3], "r"))) {
+			fputs("not possible to read from plaintext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp3 = fopen(argv[4], "r"))) {
+			fputs("not possible to read from public key file!\n", stderr);
+			exit(1);
+		}
 		paillier_encrypt_str(fp1, fp2, fp3);
 		fclose(fp1);
 		fclose(fp2);
 		fclose(fp3);
 	}
+
+	//decryption
 	else if(argc == 5 && strcmp(argv[1], "decrypt")==0) {
-		fp1 = fopen(argv[2], "w");
-		fp2 = fopen(argv[3], "r");
-		fp3 = fopen(argv[4], "r");
+		//open files
+		if(!(fp1 = fopen(argv[2], "w"))) {
+			fputs("not possible to write to plaintext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp2 = fopen(argv[3], "r"))) {
+			fputs("not possible to read from ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp3 = fopen(argv[4], "r"))) {
+			fputs("not possible to read from private key file!\n", stderr);
+			exit(1);
+		}
 		paillier_decrypt_str(fp1, fp2, fp3);
 		fclose(fp1);
 		fclose(fp2);
