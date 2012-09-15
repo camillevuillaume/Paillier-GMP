@@ -79,6 +79,7 @@
  *
  */
 #include <stdio.h>
+#include <string.h>
 #include "paillier.h"
 
 /** Help message

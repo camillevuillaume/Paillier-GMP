@@ -26,12 +26,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <gmp.h>
+#include <pthread.h>
 #include "tools.h"
 
 /**
  * The function prints debug messages to stderr; it is compiled out if PAILLIER_DEBUG is not defined.
  */
-inline int debug_msg(const char *str) {
+inline void debug_msg(const char *str) {
 #ifdef PAILLIER_DEBUG
 	return fputs(str, stderr);
 #endif
@@ -72,7 +73,7 @@ int gen_random(mpz_t rnd, mp_bitcnt_t len) {
  * Since /dev/random is blocking, you may need to move your mouse to feed randomness.
  */
 int gen_prime(mpz_t prime, mp_bitcnt_t len) {
-	FILE * dev_random, *dev_urandom;
+	FILE * dev_random;
 	int byte_count, byte_read;
 	char * seed;
 	mpz_t rnd;
@@ -106,6 +107,19 @@ int gen_prime(mpz_t prime, mp_bitcnt_t len) {
 	return 0;
 }
 
+void *do_exponentiate(void *args) {
+	mpz_t basis_reduced;
+	exp_args * args_struct = (exp_args *)args;
+
+	mpz_init(basis_reduced);
+	mpz_mod(basis_reduced, args_struct->basis, args_struct->modulus);
+	mpz_powm(args_struct->result, basis_reduced, args_struct->exponent, args_struct->modulus);
+
+	mpz_clear(basis_reduced);
+	pthread_exit(NULL);
+}
+
+
 /**
  * The exponentiation is computed using Garner's method for the CRT:
  * - Exponentiation mod p: y_p = (x mod p)^{exp_p} mod p
@@ -113,34 +127,78 @@ int gen_prime(mpz_t prime, mp_bitcnt_t len) {
  * - Recombination: y = y_p + p*(p^{-1} mod q)*(y_q-y_p) mod n
  */
 int crt_exponentiation(mpz_t result, mpz_t base, mpz_t exp_p, mpz_t exp_q, mpz_t pinvq, mpz_t p, mpz_t q) {
-	mpz_t res_p, res_q, base_p, base_q, pq;
-	mpz_init(res_p);
-	mpz_init(res_q);
-	mpz_init(base_p);
-	mpz_init(base_q);
+	mpz_t pq;
+	exp_args *args_p, *args_q;
+
+#ifdef PAILLIER_THREAD
+	pthread_t thread1, thread2;
+#endif
+
 	mpz_init(pq);
 
+	//prepare arguments for exponentiation mod p
+	args_p = (exp_args *)malloc(sizeof(exp_args));
+
+	mpz_init(args_p->result);
+	mpz_init(args_p->basis);
+	mpz_init(args_p->exponent);
+	mpz_init(args_p->modulus);
+
+	mpz_set(args_p->basis, base);
+	mpz_set(args_p->exponent, exp_p);
+	mpz_set(args_p->modulus, p);
+
+	//prepare arguments for exponentiation mod q
+	args_q = (exp_args *)malloc(sizeof(exp_args));
+
+	mpz_init(args_q->result);
+	mpz_init(args_q->basis);
+	mpz_init(args_q->exponent);
+	mpz_init(args_q->modulus);
+
+	mpz_set(args_q->basis, base);
+	mpz_set(args_q->exponent, exp_q);
+	mpz_set(args_q->modulus, q);
+
+#ifdef PAILLIER_THREAD
 	//compute exponentiation modulo p
-	mpz_mod(base_p, base, p);
-	mpz_powm(res_p, base_p, exp_p, p);
+	pthread_create(&thread1, NULL, do_exponentiate, (void *)args_p);
 
 	//compute exponentiation modulo q
-	mpz_mod(base_q, base, q);
-	mpz_powm(res_q, base_q, exp_q, q);
+	pthread_create(&thread2, NULL, do_exponentiate, (void *)args_q);
+
+	pthread_join(thread1, NULL);
+	pthread_join(thread2, NULL);
+
+#else
+	//compute exponentiation modulo p
+	mpz_mod(args_p->result, base, p);
+	mpz_powm(args_p->result, args_p->result, exp_p, p);
+
+	//compute exponentiation modulo q
+	mpz_mod(args_q->result, base, q);
+	mpz_powm(args_q->result, args_q->result, exp_q, q);
+#endif
 
 	//recombination
 	mpz_mul(pq, p, q);
-	mpz_sub(result, res_q, res_p);
+	mpz_sub(result, args_q->result, args_p->result);
 	mpz_mul(result, result, p);
 	mpz_mul(result, result, pinvq);
-	mpz_add(result, result, res_p);
+	mpz_add(result, result, args_p->result);
 	mpz_mod(result, result, pq);
 
-	mpz_clear(res_p);
-	mpz_clear(res_q);
-	mpz_clear(base_p);
-	mpz_clear(base_q);
 	mpz_clear(pq);
+	mpz_clear(args_p->result);
+	mpz_clear(args_p->basis);
+	mpz_clear(args_p->exponent);
+	mpz_clear(args_p->modulus);
+	mpz_clear(args_q->result);
+	mpz_clear(args_q->basis);
+	mpz_clear(args_q->exponent);
+	mpz_clear(args_q->modulus);
+	free(args_p);
+	free(args_q);
 
 	return 0;
 }

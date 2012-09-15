@@ -41,7 +41,18 @@
  * @ingroup Tools
  * @param[in] str input debug message
  */
-inline int debug_msg(const char *str);
+inline void debug_msg(const char *str);
+
+
+/** Structure for threaded exponentiation
+ *
+ */
+typedef struct {
+	mpz_t result; /**< result of exponentiation */
+	mpz_t basis; /**< basis of exponentiation */
+	mpz_t exponent; /**< exponent of exponentiation */
+	mpz_t modulus; /**< modulus of exponentiation */
+} exp_args;
 
 /** Generate random number
  *

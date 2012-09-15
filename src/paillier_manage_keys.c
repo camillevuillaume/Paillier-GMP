@@ -24,6 +24,7 @@
  */
 
 #include "paillier.h"
+#include "tools.h"
 
 void paillier_public_init(paillier_public_key *pub) {
 	mpz_init(pub->n);
