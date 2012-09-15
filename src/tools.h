@@ -54,10 +54,20 @@ typedef struct {
 	mpz_t modulus; /**< modulus of exponentiation */
 } exp_args;
 
-/** Generate random number
+/** Generate a pseudo-random number
  *
  * @ingroup Tools
  * @param[out] rnd output random number, randomness coming from /dev/urandom
+ * @param[in] len input bit length of the random number to generate
+ */
+int gen_pseudorandom(
+		mpz_t rnd,
+		mp_bitcnt_t len);
+
+/** Generate a random number
+ *
+ * @ingroup Tools
+ * @param[out] rnd output random number, randomness coming from /dev/random first and then /dev/urandom
  * @param[in] len input bit length of the random number to generate
  */
 int gen_random(

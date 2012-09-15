@@ -65,7 +65,7 @@ int paillier_ell(mpz_t result, mpz_t input, mpz_t ninv, mp_bitcnt_t len) {
  * - It calculates lambda = lcm((p-1)*(q-1))
  * - It calculates mu = L(g^lambda mod n^2)^{-1} mod n using the CRT.
  * .
- * Since the prime numbers are generated with /dev/random as source of randomness, the program may block.
+ * Since /dev/random is one of the sources of randomness in prime generation, the program may block.
  * In that case, you have to wait or move your mouse to feed /dev/random with fresh randomness.
  */
 int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bitcnt_t len) {
@@ -173,7 +173,7 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 
 		debug_msg("generating random number\n");
 		//generate random r and reduce modulo n
-		gen_random(r, pub->len);
+		gen_pseudorandom(r, pub->len);
 		mpz_mod(r, r, pub->n);
 		if(mpz_cmp_ui(r, 0) == 0) {
 			fputs("random number is zero!\n", stderr);

@@ -39,9 +39,10 @@ inline void debug_msg(const char *str) {
 }
 
 /**
- * Generate a random number using /dev/urandom
+ * Generate a random number using /dev/urandom.
+ * Random number generation does not block.
  */
-int gen_random(mpz_t rnd, mp_bitcnt_t len) {
+int gen_pseudorandom(mpz_t rnd, mp_bitcnt_t len) {
 	FILE *dev_urandom;
 	int byte_count, byte_read;
 	char * seed;
@@ -69,7 +70,51 @@ int gen_random(mpz_t rnd, mp_bitcnt_t len) {
 }
 
 /**
- * Generate a random prime number using /dev/urandom as a source of randomness.
+ * Generate a random number using /dev/random for the first 128 bits and then /dev/urandom.
+ * This guarantees that there is enough entropy in the pool and that it is safe to use /dev/urandom.
+ * Since /dev/random is used, if entropy is insufficient the program will block.
+ * In that case, it is necessary to feed /dev/random with entropy, for example by moving the mouse.
+ */
+int gen_random(mpz_t rnd, mp_bitcnt_t len) {
+	FILE *dev_random, *dev_urandom;
+	int byte_count, byte_read;
+	char * seed;
+
+	byte_count = BIT2BYTE(len);
+
+	dev_random = fopen("/dev/random", "r");
+	if(dev_random == NULL) {
+		fprintf(stderr, "cannot open random number device!\n");
+		exit(1);
+	}
+	dev_urandom = fopen("/dev/urandom", "r");
+	if(dev_urandom == NULL) {
+		fprintf(stderr, "cannot open random number device!\n");
+		exit(1);
+	}
+
+	seed = (char *)malloc(sizeof(char)*byte_count);
+
+	byte_read = 0;
+	//generate the first 16 bytes with /dev/random
+	while(byte_read  < 16 && byte_read < byte_count) {
+		byte_read += fread(seed, sizeof(char), byte_count, dev_random);
+	}
+	fclose(dev_random);
+	//generate the remaining bytes with /dev/urandom
+	while(byte_read < byte_count) {
+		byte_read += fread(seed, sizeof(char), byte_count, dev_urandom);
+	}
+	fclose(dev_urandom);
+
+	mpz_import(rnd, byte_count, 1, sizeof(seed[0]), 0, 0, seed);
+	free(seed);
+	return 0;
+}
+
+/**
+ * Generate a random prime number using /dev/random and /dev/urandom as a source of randomness.
+ * @see gen_random
  */
 int gen_prime(mpz_t prime, mp_bitcnt_t len) {
 	mpz_t rnd;
