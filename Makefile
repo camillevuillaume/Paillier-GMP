@@ -1,6 +1,6 @@
 CC = gcc
-#CFLAGS = -Wall -lgmp -lpthread -DPAILLIER_THREAD
-CFLAGS = -Wall -lgmp 
+CFLAGS = -Wall -lgmp -lpthread -DPAILLIER_THREAD
+#CFLAGS = -Wall -lgmp 
 DEPS = src/paillier.h src/tools.h
 OBJ_DEBUG = debug/tools.o debug/paillier.o debug/paillier_manage_keys.o debug/paillier_io.o debug/main.o 
 OBJ_LIB = release/tools.o release/paillier.o release/paillier_manage_keys.o release/paillier_io.o
