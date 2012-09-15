@@ -96,7 +96,8 @@ const char *hlp_message =
 		"options:\n"
 		"  keygen [public_key_file] [private_key_file] [bit length]\n"
 		"  encrypt [out_file] [in_file] [public_key_file]\n"
-		"  decrypt [out_file] [in_file] [private_key_file]\n";
+		"  decrypt [out_file] [in_file] [private_key_file]\n"
+		"  homoadd [out_file] [in_file1] [in_file2] [private_key_file]\n";
 
 /** Main function
  *
@@ -108,9 +109,10 @@ const char *hlp_message =
  * - keygen [public_key_file] [private_key_file] [bit length]
  * - encrypt [out_file] [in_file] [public_key_file]
  * - decrypt [out_file] [in_file] [private_key_file]
+ * - homo [out_file] [in_file1] [in_file2] [public_key_file]
  */
 int main(int argc, char *argv[]) {
-	FILE *fp1, *fp2, *fp3;
+	FILE *fp1, *fp2, *fp3, *fp4;
 	long bitlen;
 	char *end_ptr;
 
@@ -187,6 +189,32 @@ int main(int argc, char *argv[]) {
 		fclose(fp1);
 		fclose(fp2);
 		fclose(fp3);
+	}
+
+	//homomorphic add
+	else if(argc == 6 && strcmp(argv[1], "homoadd")==0) {
+		//open files
+		if(!(fp1 = fopen(argv[2], "w"))) {
+			fputs("not possible to write to third ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp2 = fopen(argv[3], "r"))) {
+			fputs("not possible to read from first ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp3 = fopen(argv[4], "r"))) {
+			fputs("not possible to read from second ciphertext file!\n", stderr);
+			exit(1);
+		}
+		if(!(fp4 = fopen(argv[5], "r"))) {
+			fputs("not possible to read from public key file!\n", stderr);
+			exit(1);
+		}
+		paillier_homomorphic_add_str(fp1, fp2, fp3, fp4);
+		fclose(fp1);
+		fclose(fp2);
+		fclose(fp3);
+		fclose(fp4);
 	}
 	else {
 		fputs(hlp_message, stderr);

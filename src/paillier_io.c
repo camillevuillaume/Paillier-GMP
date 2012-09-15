@@ -26,7 +26,6 @@
 #include "tools.h"
 #include "paillier.h"
 
-
 /**
  * Wrapper to the key generation function using stdio streams as inputs and output.
  * @see paillier_keygen
@@ -142,4 +141,53 @@ int paillier_decrypt_str(FILE *plaintext, FILE *ciphertext, FILE *private_key) {
 	return result;
 }
 
+/**
+ * Wrapper to the homomorphic addition function using stdio streams as inputs and output.
+ * @see paillier_homomorphic_add
+ */
+int paillier_homomorphic_add_str(FILE *ciphertext3, FILE *ciphertext1, FILE *ciphertext2, FILE *public_key) {
+	mpz_t c3, c1, c2, n2;
+	paillier_public_key pub;
+	int result;
+
+	mpz_init(c3);
+	mpz_init(c1);
+	mpz_init(c2);
+	mpz_init(n2);
+	paillier_public_init(&pub);
+
+	//import public key
+	debug_msg("importing public key: \n");
+	paillier_public_in_str(&pub, public_key);
+
+	//compute n^2
+	mpz_mul(n2, pub.n, pub.n);
+
+	//convert ciphertexts from stream
+	debug_msg("importing ciphertexts: \n");
+	gmp_fscanf(ciphertext1, "%Zx\n", c1);
+	if(mpz_cmp(c1, n2) >= 0) {
+		fputs("Warning, first ciphertext is larger than modulus n^2!\n", stderr);
+	}
+	gmp_fscanf(ciphertext2, "%Zx\n", c2);
+	if(mpz_cmp(c2, n2) >= 0) {
+		fputs("Warning, second ciphertext is larger than modulus n^2!\n", stderr);
+	}
+	//calculate decryption
+	result = paillier_homomorphic_add(c3, c1, c2, &pub);
+
+	//convert result to stream
+	debug_msg("exporting result: \n");
+	gmp_fprintf(ciphertext3, "%Zx\n", c3);
+
+	debug_msg("freeing memory\n");
+	mpz_clear(c3);
+	mpz_clear(c1);
+	mpz_clear(c2);
+	mpz_clear(n2);
+	paillier_public_clear(&pub);
+
+	debug_msg("exiting\n");
+	return result;
+}
 

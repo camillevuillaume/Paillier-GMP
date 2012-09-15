@@ -202,5 +202,35 @@ int paillier_decrypt_str(
 		FILE *plaintext,
 		FILE *private_key);
 
+/** Homomorphically add two plaintexts by multiplying corresponding ciphertexts
+ *
+ * @ingroup Paillier
+ * @param[out] result output ciphertext corresponding to the homomorphic addition of the two plaintexts
+ * @param[in] ciphertext1 input first ciphertext corresponding to a plaintext to be homomorphically added
+ * @param[in] ciphertext2 input second ciphertext corresponding to a plaintext to be homomorphically added
+ * @param[in] pub input private key
+ * @return 0 if no error
+ *
+ */
+int paillier_homomorphic_add(
+		mpz_t result,
+		mpz_t ciphertext1,
+		mpz_t ciphertext2,
+		paillier_public_key *pub);
+
+/** Homomorphically add from stdio stream
+ *
+ * @ingroup Paillier
+ * @param[out] ciphertext3 output stream for result of homomorphic addition
+ * @param[in] ciphertext1 input stream for first ciphertext c1
+ * @param[in] ciphertext2 input stream for first ciphertext c2
+ * @param[in] public_key input stream for public key
+ * @return 0 if no error
+ */
+int paillier_homomorphic_add_str(
+		FILE *ciphertext3,
+		FILE *ciphertext1,
+		FILE *ciphertext2,
+		FILE *public_key);
 
 #endif /* PAILLIER_H_ */

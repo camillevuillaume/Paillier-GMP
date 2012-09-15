@@ -222,3 +222,25 @@ int paillier_decrypt(mpz_t plaintext, mpz_t ciphertext, paillier_private_key *pr
 	debug_msg("exiting\n");
 	return 0;
 }
+
+/**
+ * "Add" two plaintexts homomorphically by multiplying ciphertexts modulo n^2.
+ * For example, given the ciphertexts c1 and c2, encryptions of plaintexts m1 and m2,
+ * the value c3=c1*c2 mod n^2 is a ciphertext that decrypts to m1+m2 mod n.
+ */
+int paillier_homomorphic_add(mpz_t result, mpz_t ciphertext1, mpz_t ciphertext2, paillier_public_key *pub) {
+	mpz_t n2;
+
+	mpz_init(n2);
+	debug_msg("compute n^2");
+	mpz_mul(n2, pub->n, pub->n);
+
+	debug_msg("homomorphic add plaintexts");
+	mpz_mul(result, ciphertext1, ciphertext2);
+	mpz_mod(result, result, n2);
+
+	debug_msg("freeing memory\n");
+	mpz_clear(n2);
+	debug_msg("exiting\n");
+	return 0;
+}
