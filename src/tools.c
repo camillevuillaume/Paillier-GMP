@@ -34,7 +34,7 @@
  */
 inline void debug_msg(const char *str) {
 #ifdef PAILLIER_DEBUG
-	return fputs(str, stderr);
+	fputs(str, stderr);
 #endif
 }
 

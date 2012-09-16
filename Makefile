@@ -31,7 +31,8 @@ doc:
 #clean project
 .PHONY: clean
 clean:
-	rm -fr release/* debug/* doc/*
+	rm -fr release/*.o debug/*.o doc/*
+	rm -fr release/Paillier debug/Paillier
 
 debug: debug/paillier
 release: release/paillier
