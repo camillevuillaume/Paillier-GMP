@@ -45,7 +45,7 @@ paillier keygen [public key file name] [private key file name] [bit length]
 
 Generate two files, one storing the public key, the other the private key, based on the specified keylength. Example: `/paillier keygen pub2048 priv2048 2048` will generate the 2048-bit public and private keys and store them in two files.
 
-````
+```
 paillier encrypt [output ciphertext file name] [input plain text file name] [public key file name]
 ```
 
