@@ -12,9 +12,9 @@ echo 4 > m2
 ./paillier decrypt m3 c3 priv4096
 result=`cat m3`
 if [ "$result" == "7" ]; then
-	echo "[OK] -> $result == 7"
+	echo "[OK] -> $result == 0x7"
 else
-	echo "[NG] -> $result !== 7"
+	echo "[NG] -> $result !== 0x7"
 fi
 echo "Homomorphic multiplication 4x5 using enc(4) and 5."
 echo 5 > m4
@@ -22,7 +22,7 @@ echo 5 > m4
 ./paillier decrypt m5 c5 priv4096
 result2=`cat m5`
 if [ "$result2" == "14" ]; then
-	echo "[OK] -> $result == 14"
+	echo "[OK] -> $result2 == 0x14"
 else
-	echo "[NG] -> $result != 14"
+	echo "[NG] -> $result2 != 0x14"
 fi
