@@ -83,22 +83,22 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	pub->len = len;
 
 	//generate p and q
-	debug_msg("generating prime p\n");
+	DEBUG_MSG("generating prime p\n");
 	gen_prime(p, len/2);
-	debug_msg("generating prime q\n");
+	DEBUG_MSG("generating prime q\n");
 	gen_prime(q, len/2);
 
 	//calculate modulus n=p*q
-	debug_msg("calculating modulus n=p*q\n");
+	DEBUG_MSG("calculating modulus n=p*q\n");
 	mpz_mul(pub->n, p, q);
 	mpz_mul(priv->n, p, q);
 
 	//set g = 1+n
-	debug_msg("calculating basis g=1+n\n");
+	DEBUG_MSG("calculating basis g=1+n\n");
 	mpz_add_ui(g, pub->n, 1);
 
 	//compute n^{-1} mod 2^{len}
-	debug_msg("computing modular inverse n^{-1} mod 2^{len}\n");
+	DEBUG_MSG("computing modular inverse n^{-1} mod 2^{len}\n");
 	mpz_setbit(temp, len);
 	if(!mpz_invert(priv->ninv, pub->n, temp)) {
 		fputs("Inverse does not exist!\n", stderr);
@@ -116,11 +116,11 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	mpz_mul(priv->q2, q, q);
 
 	//generate CRT parameter
-	debug_msg("calculating CRT parameter p^{-2} mod q^2\n");
+	DEBUG_MSG("calculating CRT parameter p^{-2} mod q^2\n");
 	mpz_invert(priv->p2invq2, priv->p2, priv->q2);
 
 	//calculate lambda = lcm(p-1,q-1)
-	debug_msg("calculating lambda=lcm((p-1)*(q-1))\n");
+	DEBUG_MSG("calculating lambda=lcm((p-1)*(q-1))\n");
 	mpz_clrbit(p, 0);
 	mpz_clrbit(q, 0);
 	mpz_lcm(priv->lambda, p, q);
@@ -129,7 +129,7 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	mpz_mul(n2, pub->n, pub->n);
 
 	//calculate mu
-	debug_msg("calculating mu\n");
+	DEBUG_MSG("calculating mu\n");
 	crt_exponentiation(temp, g, priv->lambda, priv->lambda, priv->p2invq2, priv->p2, priv->q2);
 
 	paillier_ell(temp, temp, priv->ninv, len);
@@ -146,14 +146,14 @@ int paillier_keygen(paillier_public_key *pub, paillier_private_key *priv, mp_bit
 	}
 
 	//free memory and exit
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(p);
 	mpz_clear(q);
 	mpz_clear(n2);
 	mpz_clear(temp);
 	mpz_clear(mask);
 	mpz_clear(g);
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return 0;
 }
 
@@ -171,7 +171,7 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 		//re-compute n^2
 		mpz_mul(n2, pub->n, pub->n);
 
-		debug_msg("generating random number\n");
+		DEBUG_MSG("generating random number\n");
 		//generate random r and reduce modulo n
 		gen_pseudorandom(r, pub->len);
 		mpz_mod(r, r, pub->n);
@@ -182,7 +182,7 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 			exit(1);
 		}
 
-		debug_msg("computing ciphertext\n");
+		DEBUG_MSG("computing ciphertext\n");
 		//compute r^n mod n2
 		mpz_powm(ciphertext, r, pub->n, n2);
 
@@ -194,11 +194,11 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
 		mpz_mul(ciphertext, ciphertext, r);
 		mpz_mod(ciphertext, ciphertext, n2);
 
-		debug_msg("freeing memory\n");
+		DEBUG_MSG("freeing memory\n");
 		mpz_clear(n2);
 		mpz_clear(r);
 	}
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return 0;
 }
 
@@ -208,7 +208,7 @@ int paillier_encrypt(mpz_t ciphertext, mpz_t plaintext, paillier_public_key *pub
  *
  */
 int paillier_decrypt(mpz_t plaintext, mpz_t ciphertext, paillier_private_key *priv) {
-	debug_msg("computing plaintext\n");
+	DEBUG_MSG("computing plaintext\n");
 	//compute exponentiation c^lambda mod n^2
 	crt_exponentiation(plaintext, ciphertext, priv->lambda, priv->lambda, priv->p2invq2, priv->p2, priv->q2);
 
@@ -219,7 +219,7 @@ int paillier_decrypt(mpz_t plaintext, mpz_t ciphertext, paillier_private_key *pr
 	mpz_mul(plaintext, plaintext, priv->mu);
 	mpz_mod(plaintext, plaintext, priv->n);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return 0;
 }
 
@@ -232,16 +232,16 @@ int paillier_homomorphic_add(mpz_t ciphertext3, mpz_t ciphertext1, mpz_t ciphert
 	mpz_t n2;
 
 	mpz_init(n2);
-	debug_msg("compute n^2");
+	DEBUG_MSG("compute n^2");
 	mpz_mul(n2, pub->n, pub->n);
 
-	debug_msg("homomorphic add plaintexts");
+	DEBUG_MSG("homomorphic add plaintexts");
 	mpz_mul(ciphertext3, ciphertext1, ciphertext2);
 	mpz_mod(ciphertext3, ciphertext3, n2);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(n2);
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return 0;
 }
 
@@ -254,14 +254,14 @@ int paillier_homomorphic_multc(mpz_t ciphertext2, mpz_t ciphertext1, mpz_t const
 	mpz_t n2;
 
 	mpz_init(n2);
-	debug_msg("compute n^2");
+	DEBUG_MSG("compute n^2");
 	mpz_mul(n2, pub->n, pub->n);
 
-	debug_msg("homomorphic multiplies plaintext with constant");
+	DEBUG_MSG("homomorphic multiplies plaintext with constant");
 	mpz_powm(ciphertext2, ciphertext1, constant, n2);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(n2);
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return 0;
 }

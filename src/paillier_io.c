@@ -42,18 +42,18 @@ int paillier_keygen_str(FILE *public_key, FILE *private_key, int len) {
 	result = paillier_keygen(&pub, &priv, len);
 
 	//export public key
-	debug_msg("export public key: \n");
+	DEBUG_MSG("export public key: \n");
 	result |= paillier_public_out_str(public_key, &pub);
 
 	//export private key
-	debug_msg("export private key: \n");
+	DEBUG_MSG("export private key: \n");
 	result |= paillier_private_out_str(private_key, &priv);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	paillier_public_clear(&pub);
 	paillier_private_clear(&priv);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return result;
 }
 
@@ -71,11 +71,11 @@ int paillier_encrypt_str(FILE *ciphertext, FILE *plaintext, FILE *public_key) {
 	paillier_public_init(&pub);
 
 	//import public key
-	debug_msg("importing public key: \n");
+	DEBUG_MSG("importing public key: \n");
 	paillier_public_in_str(&pub, public_key);
 
 	//convert plaintext from stream
-	debug_msg("importing plaintext: \n");
+	DEBUG_MSG("importing plaintext: \n");
 	gmp_fscanf(plaintext, "%Zx\n", m);
 	if(mpz_cmp(m, pub.n) >= 0) {
 		fputs("Warning, plaintext is larger than modulus n!\n", stderr);
@@ -85,15 +85,15 @@ int paillier_encrypt_str(FILE *ciphertext, FILE *plaintext, FILE *public_key) {
 	result = paillier_encrypt(c, m, &pub);
 
 	//convert ciphertext to stream
-	debug_msg("exporting ciphertext: \n");
+	DEBUG_MSG("exporting ciphertext: \n");
 	gmp_fprintf(ciphertext, "%Zx\n", c);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(c);
 	mpz_clear(m);
 	paillier_public_clear(&pub);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return result;
 }
 
@@ -112,14 +112,14 @@ int paillier_decrypt_str(FILE *plaintext, FILE *ciphertext, FILE *private_key) {
 	paillier_private_init(&priv);
 
 	//import private key
-	debug_msg("importing private key: \n");
+	DEBUG_MSG("importing private key: \n");
 	paillier_private_in_str(&priv, private_key);
 
 	//compute n^2
 	mpz_mul(n2, priv.n, priv.n);
 
 	//convert ciphertext from stream
-	debug_msg("importing ciphertext: \n");
+	DEBUG_MSG("importing ciphertext: \n");
 	gmp_fscanf(ciphertext, "%Zx\n", c);
 	if(mpz_cmp(c, n2) >= 0) {
 		fputs("Warning, ciphertext is larger than modulus n^2!\n", stderr);
@@ -128,16 +128,16 @@ int paillier_decrypt_str(FILE *plaintext, FILE *ciphertext, FILE *private_key) {
 	result = paillier_decrypt(m, c, &priv);
 
 	//convert plaintext to stream
-	debug_msg("exporting plaintext: \n");
+	DEBUG_MSG("exporting plaintext: \n");
 	gmp_fprintf(plaintext, "%Zx\n", m);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(c);
 	mpz_clear(m);
 	mpz_clear(n2);
 	paillier_private_clear(&priv);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return result;
 }
 
@@ -157,14 +157,14 @@ int paillier_homomorphic_add_str(FILE *ciphertext3, FILE *ciphertext1, FILE *cip
 	paillier_public_init(&pub);
 
 	//import public key
-	debug_msg("importing public key: \n");
+	DEBUG_MSG("importing public key: \n");
 	paillier_public_in_str(&pub, public_key);
 
 	//compute n^2
 	mpz_mul(n2, pub.n, pub.n);
 
 	//convert ciphertexts from stream
-	debug_msg("importing ciphertexts: \n");
+	DEBUG_MSG("importing ciphertexts: \n");
 	gmp_fscanf(ciphertext1, "%Zx\n", c1);
 	if(mpz_cmp(c1, n2) >= 0) {
 		fputs("Warning, first ciphertext is larger than modulus n^2!\n", stderr);
@@ -177,17 +177,17 @@ int paillier_homomorphic_add_str(FILE *ciphertext3, FILE *ciphertext1, FILE *cip
 	result = paillier_homomorphic_add(c3, c1, c2, &pub);
 
 	//convert result to stream
-	debug_msg("exporting result: \n");
+	DEBUG_MSG("exporting result: \n");
 	gmp_fprintf(ciphertext3, "%Zx\n", c3);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(c3);
 	mpz_clear(c1);
 	mpz_clear(c2);
 	mpz_clear(n2);
 	paillier_public_clear(&pub);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return result;
 }
 
@@ -207,14 +207,14 @@ int paillier_homomorphic_multc_str(FILE *ciphertext2, FILE *ciphertext1, FILE *c
 	paillier_public_init(&pub);
 
 	//import public key
-	debug_msg("importing public key: \n");
+	DEBUG_MSG("importing public key: \n");
 	paillier_public_in_str(&pub, public_key);
 
 	//compute n^2
 	mpz_mul(n2, pub.n, pub.n);
 
 	//convert ciphertext from stream
-	debug_msg("importing ciphertexts: \n");
+	DEBUG_MSG("importing ciphertexts: \n");
 	gmp_fscanf(ciphertext1, "%Zx\n", c1);
 	if(mpz_cmp(c1, n2) >= 0) {
 		fputs("Warning, first ciphertext is larger than modulus n^2!\n", stderr);
@@ -227,17 +227,17 @@ int paillier_homomorphic_multc_str(FILE *ciphertext2, FILE *ciphertext1, FILE *c
 	result = paillier_homomorphic_multc(c2, c1, k, &pub);
 
 	//convert result to stream
-	debug_msg("exporting result: \n");
+	DEBUG_MSG("exporting result: \n");
 	gmp_fprintf(ciphertext2, "%Zx\n", c2);
 
-	debug_msg("freeing memory\n");
+	DEBUG_MSG("freeing memory\n");
 	mpz_clear(c2);
 	mpz_clear(c1);
 	mpz_clear(k);
 	mpz_clear(n2);
 	paillier_public_clear(&pub);
 
-	debug_msg("exiting\n");
+	DEBUG_MSG("exiting\n");
 	return result;
 }
 

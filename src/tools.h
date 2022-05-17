@@ -36,13 +36,15 @@
  */
 #define BIT2BYTE(a) (a+7)>>3
 
+#ifdef PAILLIER_DEBUG
 /** Print debug message
  *
  * @ingroup Tools
- * @param[in] str input debug message
  */
-inline void debug_msg(const char *str);
-
+#define DEBUG_MSG(str) fputs(str, stderr)
+#else
+#define DEBUG_MSG(str)
+#endif
 
 /** Structure for threaded exponentiation
  *

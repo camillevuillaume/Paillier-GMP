@@ -30,15 +30,6 @@
 #include "tools.h"
 
 /**
- * The function prints debug messages to stderr; it is compiled out if PAILLIER_DEBUG is not defined.
- */
-inline void debug_msg(const char *str) {
-#ifdef PAILLIER_DEBUG
-	fputs(str, stderr);
-#endif
-}
-
-/**
  * Generate a random number using /dev/urandom.
  * Random number generation does not block.
  */

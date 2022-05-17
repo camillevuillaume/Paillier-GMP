@@ -60,7 +60,7 @@ int paillier_public_out_str(FILE *fp, paillier_public_key *pub) {
 	printf_ret = gmp_fprintf(fp, "%d\n", pub->len);
 	if(printf_ret < 0) return printf_ret;
 	result += printf_ret;
-	debug_msg("output modulus n\n");
+	DEBUG_MSG("output modulus n\n");
 	printf_ret = gmp_fprintf(fp, "%Zx\n", pub->n);
 	if(printf_ret < 0) return printf_ret;
 	result += printf_ret;
@@ -102,11 +102,11 @@ int paillier_private_out_str(FILE *fp, paillier_private_key *priv) {
 int paillier_public_in_str(paillier_public_key *pub, FILE *fp) {
 	int scanf_ret, result = 0;
 
-	debug_msg("importing bit length\n");
+	DEBUG_MSG("importing bit length\n");
 	scanf_ret = gmp_fscanf(fp, "%d\n", &(pub->len));
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing modulus\n");
+	DEBUG_MSG("importing modulus\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", pub->n);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
@@ -117,35 +117,35 @@ int paillier_public_in_str(paillier_public_key *pub, FILE *fp) {
 int paillier_private_in_str(paillier_private_key *priv, FILE *fp) {
 	int scanf_ret, result = 0;
 
-	debug_msg("importing bit length\n");
+	DEBUG_MSG("importing bit length\n");
 	scanf_ret = gmp_fscanf(fp, "%d\n", &(priv->len));
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing lambda\n");
+	DEBUG_MSG("importing lambda\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->lambda);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing mu\n");
+	DEBUG_MSG("importing mu\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->mu);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing p^2\n");
+	DEBUG_MSG("importing p^2\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->p2);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing q^2\n");
+	DEBUG_MSG("importing q^2\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->q2);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing p^-2 mod q^2\n");
+	DEBUG_MSG("importing p^-2 mod q^2\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->p2invq2);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing n^-1 mod 2^len\n");
+	DEBUG_MSG("importing n^-1 mod 2^len\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->ninv);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
-	debug_msg("importing n\n");
+	DEBUG_MSG("importing n\n");
 	scanf_ret = gmp_fscanf(fp, "%Zx\n", priv->n);
 	if(scanf_ret < 0) return scanf_ret;
 	result += scanf_ret;
