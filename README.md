@@ -75,14 +75,14 @@ From a ciphertext, constant and public key files, the program homomorphically mu
 Here is an example of a sequence of interpreter command executions.
 
 ```
-./paillier keygen pub2048 priv2048 2048 \
- echo 5 > m1 \
- echo 6 > m2 \
- ./paillier encrypt c1 m1 pub2048 \
- ./paillier encrypt c2 m2 pub2048 \
- ./paillier homoadd c3 c1 c2 pub2048 \
- ./paillier decrypt m3 c3 priv2048 \
- cat c3
+./paillier keygen pub2048 priv2048 2048 ;
+ echo 5 > m1 ;
+ echo 6 > m2 ;
+ ./paillier encrypt c1 m1 pub2048 ;
+ ./paillier encrypt c2 m2 pub2048 ;
+ ./paillier homoadd c3 c1 c2 pub2048 ;
+ ./paillier decrypt m3 c3 priv2048 ;
+ cat m3
 ```
 
 Should yield 0xb=11=5+6.
