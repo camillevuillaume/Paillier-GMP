@@ -13,6 +13,12 @@ More information about the Paillier cryptosystem and GMP can be found here.
 https://en.wikipedia.org/wiki/Paillier_cryptosystem
 https://gmplib.org/
 
+## How to use
+
+Using the shared library and the provided header file, one can develop programs that make use of the Paillier cryptosystem.
+For simple experimentations with the command line, a standalone interpreter is provided (it works without the shared library). Syntax is described below.
+The interpreter can also be compiled not as a standalone module, but linked to the shared library.
+In all cases, GMP must be installed in the system.
 
 ## Detailed Description
 
