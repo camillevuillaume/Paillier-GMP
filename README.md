@@ -6,7 +6,13 @@ Paillier-GMP
 The Paillier cryptosystem is a public-key cryptosystem with a very interesting property: given the encryption of two messages m1 and m2, anybody can compute the encryption of m1+m2! There are multiple applications, including for instance secure electronic voting, or private information retrieval, where one can query a database without the database knowing which element has been retrieved, and far more.
 While there are other cryptosystems like pairing-based cryptography where it is also possible to compute one addition on top of additions, and even fully homomorphic cryptosystems, the Paillier cryptosystem has the advantage of being relatively simple, efficient and is based on well-understood mathematics. Furthermore, it is sufficient for many applications.
 
-The motivation of this program is to implement the Paillier cryptosystem in C using the GMP library (GNU Multiple Precision Arithmetic Library) for low-level functions. The cryptosystem is provided as a library, and a small command interpreter is also available to execute various tasks like key generation, encryption, decryption, homomorphic operations from the command line. The program was developed from a Linux machine and has not been tested on a different environment.
+The motivation of this program is to implement the Paillier cryptosystem in C using the GMP library (GNU Multiple Precision Arithmetic Library) for low-level functions. 
+The cryptosystem is provided as a shared library, and a small command interpreter is also available to execute various tasks like key generation, encryption, decryption, homomorphic operations from the command line. The program was developed from a Linux machine and has not been tested on a different environment.
+
+More information about the Paillier cryptosystem and GMP can be found here.
+https://en.wikipedia.org/wiki/Paillier_cryptosystem
+https://gmplib.org/
+
 
 ## Detailed Description
 
@@ -24,9 +30,9 @@ It uses the following implementation tricks:
  - A small command interpreter for generating keys, encrypting and decrypting text files (or stdin).
 
 Using the provided makefile, you can:
- - Compile a static library.
+ - Compile a shared library.
  - Compile the interpreter.
- - Compile the interpreter with debug symbols and debug messages.
+ - Compile the library interpreter with debug symbols and debug messages.
  - Compile the documentation with doxygen.
 
 ## Requirements
@@ -91,11 +97,11 @@ Should yield 0xb=11=5+6.
 ## Building the program
 
 Make options:
- - "make all" will build the documentation, the interpreter and the static library.
- - "make release" will build the interpreter (which includes all object files, but does not build the static library).
- - "make lib" will build the static library, but not the interpreter.
+ - "make all" will build the documentation, the interpreter and the shared library.
+ - "make release" will build the interpreter and the shared library.
+ - "make lib" will build the shared library, but not the interpreter.
  - "make doc" will build the documentation.
- - "make debug" will build the interpreter with debug symbols.
+ - "make debug" will build the shared library and the interpreter with debug symbols.
 
 ## Warning
 

@@ -24,7 +24,7 @@
  */
 
 #include <stdlib.h>
-#include "paillier.h"
+#include "../include/paillier.h"
 #include "tools.h"
 
 /** Function L(u)=(u-1)/n

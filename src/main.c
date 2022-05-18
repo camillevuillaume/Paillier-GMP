@@ -29,7 +29,7 @@
 #include <string.h>
 #include <limits.h>
 #include <errno.h>
-#include "paillier.h"
+#include "../include/paillier.h"
 
 /** Help message
  *
