@@ -31,8 +31,8 @@ It uses the following implementation tricks:
 
 Using the provided makefile, you can:
  - Compile a shared library.
- - Compile the interpreter.
- - Compile the library interpreter with debug symbols and debug messages.
+ - Compile the interpreter either linked to the shared library or as standalone program.
+ - Compile the interpreter linked to the shared library with debug symbols and debug messages.
  - Compile the documentation with doxygen.
 
 ## Requirements
@@ -45,7 +45,7 @@ sudo apt install libgmp-dev
 
 ## Syntax for the built-in interpreter
 
-Available commands:
+Available commands for the interpreter (in case of standalone interpreter, please replace `paillier` by `paillier_standalone`):
 ```
 paillier keygen [public key file name] [private key file name] [bit length]
 ```
@@ -99,6 +99,7 @@ Should yield 0xb=11=5+6.
 Make options:
  - "make all" will build the documentation, the interpreter and the shared library.
  - "make release" will build the interpreter and the shared library.
+ - "make standalone" will build the interpreter as standalone module, without the shared library.
  - "make lib" will build the shared library, but not the interpreter.
  - "make doc" will build the documentation.
  - "make debug" will build the shared library and the interpreter with debug symbols.
